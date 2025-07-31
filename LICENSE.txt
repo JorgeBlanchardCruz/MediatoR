@@ -1,0 +1,7 @@
+Copyright (c) 2025 Jorge Blanchard Cruz
+
+This software is licensed under the terms of the Creative Commons Attribution 4.0 License (CC BY 4.0). This means you are free to use, share, and modify this software as long as you give proper credit to me as the original author.
+
+Additionally, if you wish to support my work, I accept donations. You can contact me or visit [your donation link, e.g., PayPal, Patreon, etc.] for more information.
+
+For more details about the CC BY 4.0 license, visit: https://creativecommons.org/licenses/by/4.0/
