@@ -8,7 +8,7 @@ public class OtherMiddleware : IMediatorMiddleware
         Console.WriteLine("--> Delay: Before");
         Console.ResetColor();
 
-        await Task.Delay(1000);
+        await Task.Delay(500);
 
         await next(request);
 

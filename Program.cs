@@ -1,4 +1,5 @@
 ﻿using MediatoR;
+using System.Reflection;
 
 #region PingCommand
 public sealed record PingCommand(string Message) : IRequest<string>
@@ -42,9 +43,10 @@ public sealed class NotificationHandler : INotificationHandler<Notification>
 {
     public Task Handle(Notification notification)
     {
-        Console.ForegroundColor = ConsoleColor.Green;
+        Console.ForegroundColor = ConsoleColor.Blue;
         Console.WriteLine($"{notification.Content}");
         Console.ResetColor();
+
         return Task.CompletedTask;
     }
 }
@@ -56,15 +58,8 @@ public class Program
     public static async Task Main(string[] args)
     {
         var mediator = new MediatoR.MediatoR();
-
-        // Registrar manejadores
-        mediator.RegisterHandler(new PingHandler());
-        mediator.RegisterHandler(new JoinHandler());
-        mediator.RegisterHandler(new NotificationHandler());
-
-        // Registrar middlewares
-        mediator.RegisterMiddleware(new LoggingMiddleware());
-        mediator.RegisterMiddleware(new OtherMiddleware());
+        mediator.RegisterHandlersFromAssembly(Assembly.GetExecutingAssembly());
+        mediator.RegisterMiddlewareFromAssembly(Assembly.GetExecutingAssembly());
 
         // Enviar comandos
         var response = await mediator.Send<PingCommand, string>(new PingCommand("Pong"));
@@ -78,4 +73,5 @@ public class Program
         Console.WriteLine("Presiona cualquier tecla para salir...");
         Console.ReadKey();
     }
+
 }

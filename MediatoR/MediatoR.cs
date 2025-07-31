@@ -1,4 +1,6 @@
-﻿namespace MediatoR;
+﻿using System.Reflection;
+
+namespace MediatoR;
 
 /// <summary>
 /// Provides a mediator implementation for handling requests, notifications, and middleware pipelines.
@@ -48,6 +50,92 @@ public class MediatoR : IMediator
     {
         _handlers = handlers;
         _middlewares = middlewares;
+    }
+
+    /// <summary>
+    /// Registers all handlers and notification handlers found in the specified assembly.
+    /// </summary>
+    /// <remarks>This method scans the provided assembly for types that implement specific handler interfaces
+    /// and registers them for use. Both command handlers and notification handlers are included in the registration
+    /// process.</remarks>
+    /// <param name="assembly">The assembly to scan for handlers and notification handlers. Cannot be <see langword="null"/>.</param>
+    public void RegisterHandlersFromAssembly(Assembly assembly)
+    {
+        RegisterHandlers(assembly);
+        RegisterNotificationHandlers(assembly);
+    }
+
+    private void RegisterHandlers(Assembly assembly)
+    {
+        var requestHandlerTypes = assembly.GetTypes()
+            .Where(t => t.GetInterfaces().Any(i => i.IsGenericType &&
+                (i.GetGenericTypeDefinition() == typeof(IRequestHandler<,>) ||
+                 i.GetGenericTypeDefinition() == typeof(IRequestHandler<>))))
+            .ToList();
+
+        foreach (var handlerType in requestHandlerTypes)
+        {
+            var handlerInstance = Activator.CreateInstance(handlerType);
+            var interfaces = handlerType.GetInterfaces();
+
+            foreach (var @interface in interfaces)
+            {
+                if (@interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(IRequestHandler<,>))
+                {
+                    var requestType = @interface.GetGenericArguments()[0];
+                    RegisterHandler((dynamic)handlerInstance!);
+                }
+                else if (@interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(IRequestHandler<>))
+                {
+                    var requestType = @interface.GetGenericArguments()[0];
+                    RegisterHandler((dynamic)handlerInstance!);
+                }
+            }
+        }
+    }
+
+    private void RegisterNotificationHandlers(Assembly assembly)
+    {
+        var notificationHandlerTypes = assembly.GetTypes()
+            .Where(t => t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(INotificationHandler<>)))
+            .ToList();
+
+        foreach (var handlerType in notificationHandlerTypes)
+        {
+            var handlerInstance = Activator.CreateInstance(handlerType);
+            var interfaces = handlerType.GetInterfaces();
+
+            foreach (var @interface in interfaces)
+            {
+                if (@interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(INotificationHandler<>))
+                {
+                    var notificationType = @interface.GetGenericArguments()[0];
+                    RegisterHandler((dynamic)handlerInstance!);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Registers all middleware types from the specified assembly that implement the <see cref="IMediatorMiddleware"/>
+    /// interface.
+    /// </summary>
+    /// <remarks>This method identifies all non-abstract types in the provided assembly that implement the
+    /// <see cref="IMediatorMiddleware"/> interface. Each identified type is instantiated and registered as middleware.
+    /// Ensure that the types have a parameterless constructor, as the method uses <see
+    /// cref="Activator.CreateInstance(Type)"/> to create instances.</remarks>
+    /// <param name="assembly">The assembly to scan for middleware types. Must not be <see langword="null"/>.</param>
+    public void RegisterMiddlewareFromAssembly(Assembly assembly)
+    {
+        var middlewareTypes = assembly.GetTypes()
+            .Where(t => typeof(IMediatorMiddleware).IsAssignableFrom(t) && !t.IsAbstract)
+            .ToList();
+
+        foreach (var middlewareType in middlewareTypes)
+        {
+            var middlewareInstance = Activator.CreateInstance(middlewareType);
+            RegisterMiddleware((IMediatorMiddleware)middlewareInstance!);
+        }
     }
 
     /// <inheritdoc />
