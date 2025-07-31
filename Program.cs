@@ -44,7 +44,8 @@ public class Program
 
         // Enviar comando
         var ping = new Ping { Message = "Hola" };
-        var response = await mediator.Send(ping);
+
+        var response = await mediator.Send<Ping, string>(ping);
         Console.WriteLine(response);
 
 
