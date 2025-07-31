@@ -42,7 +42,9 @@ public sealed class NotificationHandler : INotificationHandler<Notification>
 {
     public Task Handle(Notification notification)
     {
-        Console.WriteLine($"Notification received: {notification.Content}");
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"{notification.Content}");
+        Console.ResetColor();
         return Task.CompletedTask;
     }
 }

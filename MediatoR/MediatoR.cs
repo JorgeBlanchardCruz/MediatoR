@@ -174,15 +174,12 @@ public class MediatoR : IMediator
     {
         if (!_handlers.TryGetValue(typeof(TNotification), out var handlerObj))
         {
-            return;
+            throw new InvalidOperationException($"No handler registered for {typeof(TNotification).Name}");
         }
 
-        var handlers = (List<INotificationHandler<TNotification>>)handlerObj;
+        var handler = (INotificationHandler<TNotification>)handlerObj;
 
-        foreach (var handler in handlers)
-        {
-            await handler.Handle(notification);
-        }
+        await handler.Handle(notification);
     }
 
 }

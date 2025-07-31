@@ -1,10 +1,5 @@
 ﻿namespace MediatoR;
 
-public interface IOtherMiddleware
-{
-    Task InvokeAsync(object request, Func<object, Task> next);
-}
-
 public class OtherMiddleware : IMediatorMiddleware
 {
     public async Task InvokeAsync(object request, Func<object, Task> next)
