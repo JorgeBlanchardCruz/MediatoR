@@ -43,8 +43,10 @@ public sealed class NotificationHandler : INotificationHandler<Notification>
 {
     public Task Handle(Notification notification)
     {
-        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine("");
         Console.WriteLine($"{notification.Content}");
+        Console.WriteLine("");
         Console.ResetColor();
 
         return Task.CompletedTask;
@@ -68,7 +70,7 @@ public class Program
         await mediator.Send(new JoinCommand("WIOOAJSKDIIWJKASI2929J"));
 
         // Enviar notificación
-        await mediator.Publish(new Notification("Hello, World!"));
+        await mediator.Publish(new Notification("Bye, World!"));
 
         Console.WriteLine("Presiona cualquier tecla para salir...");
         Console.ReadKey();
