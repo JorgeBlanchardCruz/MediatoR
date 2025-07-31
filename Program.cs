@@ -1,4 +1,4 @@
-﻿using Mediator;
+﻿using MediatoR;
 
 public class Ping : IRequest<string>
 {
@@ -34,7 +34,7 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        var mediator = new MediatoR();
+        var mediator = new MediatoR.MediatoR();
 
         // Registrar manejadores
         mediator.RegisterHandler(new PingHandler());
@@ -43,11 +43,8 @@ public class Program
         mediator.RegisterMiddleware(new LoggingMiddleware());
 
         // Enviar comando
-        var ping = new Ping { Message = "Hola" };
-
-        var response = await mediator.Send<Ping, string>(ping);
+        var response = await mediator.Send<Ping, string>(new Ping { Message = "Hola" });
         Console.WriteLine(response);
-
 
         // Publicar notificación
         await mediator.Publish(new Notification { Content = "Evento importante" });

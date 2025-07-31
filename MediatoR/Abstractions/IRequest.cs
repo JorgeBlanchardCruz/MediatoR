@@ -1,4 +1,4 @@
-﻿namespace Mediator;
+﻿namespace MediatoR;
 
 /// <summary>
 /// Marker interface to represent a request with a void response

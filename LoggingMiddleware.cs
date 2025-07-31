@@ -1,4 +1,4 @@
-﻿namespace Mediator;
+﻿namespace MediatoR;
 
 public interface IMediatorMiddleware
 {

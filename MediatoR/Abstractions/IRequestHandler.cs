@@ -1,4 +1,4 @@
-﻿namespace Mediator;
+﻿namespace MediatoR;
 
 /// <summary>
 /// Defines a handler for a request
