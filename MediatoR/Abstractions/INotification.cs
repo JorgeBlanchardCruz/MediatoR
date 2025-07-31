@@ -1,8 +1,5 @@
 ﻿namespace MediatoR;
 
-public interface INotification { }
-
-public interface INotificationHandler<TNotification> where TNotification : INotification
-{
-    Task Handle(TNotification notification);
+public interface INotification 
+{ 
 }

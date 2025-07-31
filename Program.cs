@@ -1,26 +1,44 @@
 ﻿using MediatoR;
 
-public class Ping : IRequest<string>
+#region PingCommand
+public sealed record PingCommand(string Message) : IRequest<string>
 {
-    public string Message { get; set; }
 }
 
-public class PingHandler : IRequestHandler<Ping, string>
+public sealed class PingHandler : IRequestHandler<PingCommand, string>
 {
-    public async Task<string> Handle(Ping request, CancellationToken cancellationToken)
+    public async Task<string> Handle(PingCommand request, CancellationToken cancellationToken)
     {
-        Console.WriteLine($"Pong: {request.Message}");
+        Console.WriteLine($"Ping: {request.Message}");
 
         return await Task.FromResult($"Respuesta");
     }
 }
 
-public class Notification : INotification
+#endregion
+
+#region JoinCommand
+public sealed record JoinCommand(string Id) : IRequest
 {
-    public string Content { get; set; }
 }
 
-public class NotificationHandler : INotificationHandler<Notification>
+public sealed class JoinHandler : IRequestHandler<JoinCommand>
+{
+    public async Task Handle(JoinCommand request, CancellationToken cancellationToken)
+    {
+        await Task.Delay(1000, cancellationToken);
+        Console.WriteLine($"Join us: {request.Id}");
+    }
+}
+
+#endregion
+
+#region Notification
+public sealed record Notification(string Content) : INotification
+{
+}
+
+public sealed class NotificationHandler : INotificationHandler<Notification>
 {
     public Task Handle(Notification notification)
     {
@@ -29,6 +47,7 @@ public class NotificationHandler : INotificationHandler<Notification>
     }
 }
 
+#endregion
 
 public class Program
 {
@@ -38,16 +57,21 @@ public class Program
 
         // Registrar manejadores
         mediator.RegisterHandler(new PingHandler());
+        mediator.RegisterHandler(new JoinHandler());
+        mediator.RegisterHandler(new NotificationHandler());
 
-        // Configurar middleware
+        // Registrar middlewares
         mediator.RegisterMiddleware(new LoggingMiddleware());
+        mediator.RegisterMiddleware(new OtherMiddleware());
 
-        // Enviar comando
-        var response = await mediator.Send<Ping, string>(new Ping { Message = "Hola" });
+        // Enviar comandos
+        var response = await mediator.Send<PingCommand, string>(new PingCommand("Pong"));
         Console.WriteLine(response);
 
-        // Publicar notificación
-        await mediator.Publish(new Notification { Content = "Evento importante" });
+        await mediator.Send(new JoinCommand("WIOOAJSKDIIWJKASI2929J"));
+
+        // Enviar notificación
+        await mediator.Publish(new Notification("Hello, World!"));
 
         Console.WriteLine("Presiona cualquier tecla para salir...");
         Console.ReadKey();
