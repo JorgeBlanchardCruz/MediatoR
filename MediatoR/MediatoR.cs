@@ -71,20 +71,7 @@ public class MediatoR : IMediator
         {
             var handlerInstance = Activator.CreateInstance(handlerType);
             var interfaces = handlerType.GetInterfaces();
-
-            foreach (var @interface in interfaces)
-            {
-                if (@interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(IRequestHandler<,>))
-                {
-                    var requestType = @interface.GetGenericArguments()[0];
-                    RegisterHandler((dynamic)handlerInstance!);
-                }
-                else if (@interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(IRequestHandler<>))
-                {
-                    var requestType = @interface.GetGenericArguments()[0];
-                    RegisterHandler((dynamic)handlerInstance!);
-                }
-            }
+            RegisterHandler((dynamic)handlerInstance!);
         }
     }
 
