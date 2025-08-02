@@ -1,7 +1,5 @@
 ﻿using Products;
 using SharedKernel.Transversal.Responses;
-using System;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Requests.Products.Commands;
 

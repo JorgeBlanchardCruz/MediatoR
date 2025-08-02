@@ -23,6 +23,14 @@ public interface ISender
     Task<TResponse> Send<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default)
         where TRequest : IRequest<TResponse>;
 
+    /// <summary>
+    /// Sends the specified request to the appropriate handler for processing.
+    /// </summary>
+    /// <typeparam name="TRequest">The type of the request to be sent. Must implement <see cref="IRequest"/>.</typeparam>
+    /// <param name="request">The request object to be processed. Cannot be <see langword="null"/>.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>A <see cref="Task"/> that represents the asynchronous operation. The task completes when the request has been
+    /// processed.</returns>
     Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default)
         where TRequest : IRequest;
 }
