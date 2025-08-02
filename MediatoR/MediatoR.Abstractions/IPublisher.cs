@@ -1,4 +1,4 @@
-﻿namespace MediatoR;
+﻿namespace MediatoR.Abstractions;
 
 /// <summary>
 /// Publish a notification or event through the mediator pipeline to be handled by multiple handlers.

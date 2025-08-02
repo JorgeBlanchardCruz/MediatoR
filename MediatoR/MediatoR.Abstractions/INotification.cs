@@ -1,4 +1,4 @@
-﻿namespace MediatoR;
+﻿namespace MediatoR.Abstractions;
 
 public interface INotification 
 { 

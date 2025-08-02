@@ -1,4 +1,4 @@
-﻿namespace MediatoR;
+﻿namespace MediatoR.Abstractions;
 
 public interface INotificationHandler<TNotification> where TNotification : INotification
 {

@@ -1,4 +1,4 @@
-﻿namespace MediatoR;
+﻿namespace MediatoR.Abstractions;
 
 /// <summary>
 /// Marker interface to represent a request with a void response

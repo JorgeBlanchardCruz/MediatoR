@@ -6,6 +6,7 @@
 // I accept donations at: contact me at jorgeblanchardcruz@outlook.com
 
 #endregion License
+using MediatoR.Abstractions;
 using System.Reflection;
 
 namespace MediatoR;

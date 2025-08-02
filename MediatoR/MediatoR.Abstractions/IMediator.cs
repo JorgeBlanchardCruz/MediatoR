@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace MediatoR;
+namespace MediatoR.Abstractions;
 
 public interface IMediator : ISender, IPublisher
 {

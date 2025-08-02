@@ -1,4 +1,4 @@
-﻿namespace MediatoR;
+﻿namespace MediatoR.Abstractions;
 
 /// <summary>
 /// Defines a contract for sending requests and receiving responses asynchronously.

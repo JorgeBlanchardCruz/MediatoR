@@ -8,8 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="MediatoR\**" />
+    <EmbeddedResource Remove="MediatoR\**" />
+    <None Remove="MediatoR\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="MediatoR\MediatoR.Abstractions\MediatoR.Abstractions.csproj" />
+    <ProjectReference Include="MediatoR\MediatoR\MediatoR.csproj" />
   </ItemGroup>
 
 </Project>
