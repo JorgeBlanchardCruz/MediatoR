@@ -7,7 +7,7 @@ public class OtherMiddleware : IMediatorMiddleware
     public async Task InvokeAsync(object request, Func<object, Task> next)
     {
         Console.ForegroundColor = ConsoleColor.Magenta;
-        Console.WriteLine("--> Delay: Before");
+        Console.WriteLine("2 --> Delay: Before");
         Console.ResetColor();
 
         await Task.Delay(500);
@@ -15,7 +15,7 @@ public class OtherMiddleware : IMediatorMiddleware
         await next(request);
 
         Console.ForegroundColor = ConsoleColor.Magenta;
-        Console.WriteLine("--> Delay: After");
+        Console.WriteLine("2 --> Delay: After");
         Console.ResetColor();
     }
 }

@@ -28,7 +28,7 @@ public class MediatoR : IMediator
     /// <returns>A task that represents the asynchronous operation. The task result contains the response object.</returns>
     public delegate Task<object> RequestDelegate(object request);
 
-    private readonly Dictionary<Type, object> _handlers;
+    private readonly Dictionary<string, object> _handlers;
     private readonly List<IMediatorMiddleware> _middlewares;
 
     /// <summary>
@@ -42,44 +42,26 @@ public class MediatoR : IMediator
         _middlewares = [];
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MediatoR"/> class with the specified handlers and middleware
-    /// components.
-    /// </summary>
-    /// <remarks>The <see cref="MediatoR"/> class coordinates the dispatching of requests to their appropriate
-    /// handlers,  optionally passing through middleware for additional processing. Ensure that the <paramref
-    /// name="handlers"/>  dictionary contains all required handler mappings for the types of requests you intend to
-    /// process.</remarks>
-    /// <param name="handlers">A dictionary mapping types to their corresponding handler instances.  Each handler is responsible for processing
-    /// a specific type of request or message.</param>
-    /// <param name="middlewares">A list of middleware components that will be executed in the processing pipeline.  Middleware can modify or
-    /// extend the behavior of request handling.</param>
-    public MediatoR(Dictionary<Type, object> handlers, List<IMediatorMiddleware> middlewares)
-    {
-        _handlers = handlers;
-        _middlewares = middlewares;
-    }
-
     #region Registration Methods
     /// <inheritdoc />
     public void RegisterHandler<TRequest, TResponse>(IRequestHandler<TRequest, TResponse> handler)
         where TRequest : IRequest<TResponse>
     {
-        _handlers[typeof(TRequest)] = handler;
-    }
-
-    /// <inheritdoc />
-    public void RegisterHandler<TNotification>(INotificationHandler<TNotification> handler)
-        where TNotification : INotification
-    {
-        _handlers[typeof(TNotification)] = handler;
+        _handlers[typeof(TRequest).FullName!] = handler;
     }
 
     /// <inheritdoc />
     public void RegisterHandler<TRequest>(IRequestHandler<TRequest> handler)
         where TRequest : IRequest
     {
-        _handlers[typeof(TRequest)] = handler;
+        _handlers[typeof(TRequest).FullName!] = handler;
+    }
+
+    /// <inheritdoc />
+    public void RegisterHandler<TNotification>(INotificationHandler<TNotification> handler)
+        where TNotification : INotification
+    {
+        _handlers[typeof(TNotification).FullName!] = handler;
     }
 
     /// <inheritdoc />
@@ -95,7 +77,7 @@ public class MediatoR : IMediator
     public async Task<TResponse> Send<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default)
         where TRequest : IRequest<TResponse>
     {
-        if (!_handlers.TryGetValue(typeof(TRequest), out var handlerObj))
+        if (!_handlers.TryGetValue(typeof(TRequest).FullName!, out var handlerObj))
         {
             throw new InvalidOperationException($"No handler registered for {typeof(TRequest).Name}");
         }
@@ -117,7 +99,7 @@ public class MediatoR : IMediator
     public async Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default)
         where TRequest : IRequest
     {
-        if (!_handlers.TryGetValue(typeof(TRequest), out var handlerObj))
+        if (!_handlers.TryGetValue(typeof(TRequest).FullName!, out var handlerObj))
         {
             throw new InvalidOperationException($"No handler registered for {typeof(TRequest).Name}");
         }
@@ -133,32 +115,6 @@ public class MediatoR : IMediator
         BuildPipeline(ref pipeline);
 
         await pipeline(request);
-    }
-
-    /// <inheritdoc />
-    public async Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
-    {
-        if (request is null)
-        {
-            throw new ArgumentNullException(nameof(request), "The request cannot be null.");
-        }
-
-        if (!_handlers.TryGetValue(request.GetType(), out var handlerObj))
-        {
-            throw new InvalidOperationException($"No handler registered for {request.GetType().Name}");
-        }
-
-        var handler = (IRequestHandler<IRequest<TResponse>, TResponse>)handlerObj;
-
-        RequestDelegate pipeline = async (req) =>
-        {
-            var result = await handler.Handle((IRequest<TResponse>)req, cancellationToken);
-            return result!;
-        };
-
-        BuildPipeline(ref pipeline);
-
-        return (TResponse)await pipeline(request);
     }
 
     /// <summary>
@@ -206,7 +162,7 @@ public class MediatoR : IMediator
     private async Task ExecutePublish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
         where TNotification : INotification
     {
-        if (!_handlers.TryGetValue(typeof(TNotification), out var handlerObj))
+        if (!_handlers.TryGetValue(typeof(TNotification).FullName!, out var handlerObj))
         {
             throw new InvalidOperationException($"No handler registered for {typeof(TNotification).Name}");
         }

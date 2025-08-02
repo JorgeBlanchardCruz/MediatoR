@@ -10,7 +10,9 @@
 using Mediator.Middlewares;
 using Mediator.Notifications;
 using Mediator.Requests;
+using Products;
 using Requests.Products.Commands;
+using SharedKernel.Transversal.Responses;
 
 public class Program
 {
@@ -22,6 +24,7 @@ public class Program
         mediator.RegisterMiddleware(new OtherMiddleware());
         mediator.RegisterHandler(new PingHandler());
         mediator.RegisterHandler(new JoinHandler());
+        mediator.RegisterHandler(new NotificationHandler());
         mediator.RegisterHandler(new CreateProductHandler(new ProductsRepository()));
 
         // Enviar comandos
@@ -30,7 +33,7 @@ public class Program
 
         await mediator.Send(new JoinCommand("WIOOAJSKDIIWJKASI2929J"));
 
-        var response2 = await mediator.Send(new CreateProductCommand
+        var response2 = await mediator.Send<CreateProductCommand, Response<Product>>(new CreateProductCommand
         {
             Name = "Product 1",
             Description = "This is a product",
