@@ -1,7 +1,29 @@
-﻿namespace MediatoR;
+﻿using System.Reflection;
+
+namespace MediatoR;
 
 public interface IMediator : ISender, IPublisher
 {
+    /// <summary>
+    /// Registers all handlers and notification handlers found in the specified assembly.
+    /// </summary>
+    /// <remarks>This method scans the provided assembly for types that implement specific handler interfaces
+    /// and registers them for use. Both command handlers and notification handlers are included in the registration
+    /// process.</remarks>
+    /// <param name="assembly">The assembly to scan for handlers and notification handlers. Cannot be <see langword="null"/>.</param>
+    void RegisterHandlersFromAssembly(Assembly assembly);
+
+    /// <summary>
+    /// Registers all middleware types from the specified assembly that implement the <see cref="IMediatorMiddleware"/>
+    /// interface.
+    /// </summary>
+    /// <remarks>This method identifies all non-abstract types in the provided assembly that implement the
+    /// <see cref="IMediatorMiddleware"/> interface. Each identified type is instantiated and registered as middleware.
+    /// Ensure that the types have a parameterless constructor, as the method uses <see
+    /// cref="Activator.CreateInstance(Type)"/> to create instances.</remarks>
+    /// <param name="assembly">The assembly to scan for middleware types. Must not be <see langword="null"/>.</param>
+    void RegisterMiddlewareFromAssembly(Assembly assembly);
+
     /// <summary>
     /// Registers a handler for processing requests of a specific type.
     /// </summary>

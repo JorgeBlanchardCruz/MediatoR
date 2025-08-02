@@ -52,13 +52,7 @@ public class MediatoR : IMediator
         _middlewares = middlewares;
     }
 
-    /// <summary>
-    /// Registers all handlers and notification handlers found in the specified assembly.
-    /// </summary>
-    /// <remarks>This method scans the provided assembly for types that implement specific handler interfaces
-    /// and registers them for use. Both command handlers and notification handlers are included in the registration
-    /// process.</remarks>
-    /// <param name="assembly">The assembly to scan for handlers and notification handlers. Cannot be <see langword="null"/>.</param>
+    /// <inheritdoc />
     public void RegisterHandlersFromAssembly(Assembly assembly)
     {
         RegisterHandlers(assembly);
@@ -116,15 +110,7 @@ public class MediatoR : IMediator
         }
     }
 
-    /// <summary>
-    /// Registers all middleware types from the specified assembly that implement the <see cref="IMediatorMiddleware"/>
-    /// interface.
-    /// </summary>
-    /// <remarks>This method identifies all non-abstract types in the provided assembly that implement the
-    /// <see cref="IMediatorMiddleware"/> interface. Each identified type is instantiated and registered as middleware.
-    /// Ensure that the types have a parameterless constructor, as the method uses <see
-    /// cref="Activator.CreateInstance(Type)"/> to create instances.</remarks>
-    /// <param name="assembly">The assembly to scan for middleware types. Must not be <see langword="null"/>.</param>
+    /// <inheritdoc />
     public void RegisterMiddlewareFromAssembly(Assembly assembly)
     {
         var middlewareTypes = assembly.GetTypes()
@@ -257,7 +243,7 @@ public class MediatoR : IMediator
     /// <typeparam name="TNotification">The type of the notification being published. Must implement <see cref="INotification"/>.</typeparam>
     /// <param name="notification">The notification instance to be published. Cannot be <see langword="null"/>.</param>
     /// <returns></returns>
-    private async Task Publish<TNotification>(TNotification notification) 
+    private async Task Publish<TNotification>(TNotification notification)
         where TNotification : INotification
     {
         if (!_handlers.TryGetValue(typeof(TNotification), out var handlerObj))
