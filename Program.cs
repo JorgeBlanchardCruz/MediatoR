@@ -1,59 +1,6 @@
-﻿using MediatoR;
+﻿using Mediator.Notifications;
+using Mediator.Requests;
 using System.Reflection;
-
-#region PingCommand
-public sealed record PingCommand(string Message) : IRequest<string>
-{
-}
-
-public sealed class PingHandler : IRequestHandler<PingCommand, string>
-{
-    public async Task<string> Handle(PingCommand request, CancellationToken cancellationToken)
-    {
-        Console.WriteLine($"Ping: {request.Message}");
-
-        return await Task.FromResult($"Respuesta");
-    }
-}
-
-#endregion
-
-#region JoinCommand
-public sealed record JoinCommand(string Id) : IRequest
-{
-}
-
-public sealed class JoinHandler : IRequestHandler<JoinCommand>
-{
-    public async Task Handle(JoinCommand request, CancellationToken cancellationToken)
-    {
-        await Task.Delay(1000, cancellationToken);
-        Console.WriteLine($"Join us: {request.Id}");
-    }
-}
-
-#endregion
-
-#region Notification
-public sealed record Notification(string Content) : INotification
-{
-}
-
-public sealed class NotificationHandler : INotificationHandler<Notification>
-{
-    public Task Handle(Notification notification)
-    {
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("");
-        Console.WriteLine($"{notification.Content}");
-        Console.WriteLine("");
-        Console.ResetColor();
-
-        return Task.CompletedTask;
-    }
-}
-
-#endregion
 
 public class Program
 {

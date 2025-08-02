@@ -1,4 +1,6 @@
-﻿namespace MediatoR;
+﻿using MediatoR;
+
+namespace Mediator.Middlewares;
 
 public class OtherMiddleware : IMediatorMiddleware
 {
