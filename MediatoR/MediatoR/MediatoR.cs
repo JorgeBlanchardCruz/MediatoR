@@ -7,7 +7,6 @@
 
 #endregion License
 using MediatoR.Abstractions;
-using System.Reflection;
 
 namespace MediatoR;
 
@@ -61,65 +60,7 @@ public class MediatoR : IMediator
         _middlewares = middlewares;
     }
 
-    /// <inheritdoc />
-    public void RegisterHandlersFromAssembly(Assembly assembly)
-    {
-        RegisterHandlers(assembly);
-        RegisterNotificationHandlers(assembly);
-    }
-
-    private void RegisterHandlers(Assembly assembly)
-    {
-        var requestHandlerTypes = assembly.GetTypes()
-            .Where(t => t.GetInterfaces().Any(i => i.IsGenericType &&
-                (i.GetGenericTypeDefinition() == typeof(IRequestHandler<,>) ||
-                 i.GetGenericTypeDefinition() == typeof(IRequestHandler<>))))
-            .ToList();
-
-        foreach (var handlerType in requestHandlerTypes)
-        {
-            var handlerInstance = Activator.CreateInstance(handlerType);
-            var interfaces = handlerType.GetInterfaces();
-            RegisterHandler((dynamic)handlerInstance!);
-        }
-    }
-
-    private void RegisterNotificationHandlers(Assembly assembly)
-    {
-        var notificationHandlerTypes = assembly.GetTypes()
-            .Where(t => t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(INotificationHandler<>)))
-            .ToList();
-
-        foreach (var handlerType in notificationHandlerTypes)
-        {
-            var handlerInstance = Activator.CreateInstance(handlerType);
-            var interfaces = handlerType.GetInterfaces();
-
-            foreach (var @interface in interfaces)
-            {
-                if (@interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(INotificationHandler<>))
-                {
-                    var notificationType = @interface.GetGenericArguments()[0];
-                    RegisterHandler((dynamic)handlerInstance!);
-                }
-            }
-        }
-    }
-
-    /// <inheritdoc />
-    public void RegisterMiddlewareFromAssembly(Assembly assembly)
-    {
-        var middlewareTypes = assembly.GetTypes()
-            .Where(t => typeof(IMediatorMiddleware).IsAssignableFrom(t) && !t.IsAbstract)
-            .ToList();
-
-        foreach (var middlewareType in middlewareTypes)
-        {
-            var middlewareInstance = Activator.CreateInstance(middlewareType);
-            RegisterMiddleware((IMediatorMiddleware)middlewareInstance!);
-        }
-    }
-
+    #region Registration Methods
     /// <inheritdoc />
     public void RegisterHandler<TRequest, TResponse>(IRequestHandler<TRequest, TResponse> handler)
         where TRequest : IRequest<TResponse>
@@ -147,6 +88,9 @@ public class MediatoR : IMediator
         _middlewares.Add(middleware);
     }
 
+    #endregion
+
+    #region Send Methods
     /// <inheritdoc />
     public async Task<TResponse> Send<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default)
         where TRequest : IRequest<TResponse>
@@ -191,6 +135,32 @@ public class MediatoR : IMediator
         await pipeline(request);
     }
 
+    /// <inheritdoc />
+    public async Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+    {
+        if (request is null)
+        {
+            throw new ArgumentNullException(nameof(request), "The request cannot be null.");
+        }
+
+        if (!_handlers.TryGetValue(request.GetType(), out var handlerObj))
+        {
+            throw new InvalidOperationException($"No handler registered for {request.GetType().Name}");
+        }
+
+        var handler = (IRequestHandler<IRequest<TResponse>, TResponse>)handlerObj;
+
+        RequestDelegate pipeline = async (req) =>
+        {
+            var result = await handler.Handle((IRequest<TResponse>)req, cancellationToken);
+            return result!;
+        };
+
+        BuildPipeline(ref pipeline);
+
+        return (TResponse)await pipeline(request);
+    }
+
     /// <summary>
     /// Constructs a request processing pipeline by chaining middleware components in reverse order.
     /// </summary>
@@ -218,28 +188,22 @@ public class MediatoR : IMediator
         }
     }
 
+    #endregion
+
+    #region Publish Methods
     /// <inheritdoc />
     public async Task Publish(object notification, CancellationToken cancellationToken = default)
     {
-        await Publish((INotification)notification);
+        await ExecutePublish((INotification)notification);
     }
 
     /// <inheritdoc />
     public async Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default) where TNotification : INotification
     {
-        await Publish(notification);
+        await ExecutePublish(notification);
     }
 
-    /// <summary>
-    /// Publishes a notification to all registered handlers for the specified notification type.
-    /// </summary>
-    /// <remarks>This method asynchronously invokes all handlers registered for the specified notification
-    /// type. If no handlers are registered for the notification type, the method completes without performing any
-    /// action.</remarks>
-    /// <typeparam name="TNotification">The type of the notification being published. Must implement <see cref="INotification"/>.</typeparam>
-    /// <param name="notification">The notification instance to be published. Cannot be <see langword="null"/>.</param>
-    /// <returns></returns>
-    private async Task Publish<TNotification>(TNotification notification)
+    private async Task ExecutePublish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
         where TNotification : INotification
     {
         if (!_handlers.TryGetValue(typeof(TNotification), out var handlerObj))
@@ -249,7 +213,9 @@ public class MediatoR : IMediator
 
         var handler = (INotificationHandler<TNotification>)handlerObj;
 
-        await handler.Handle(notification);
+        await handler.Handle(notification, cancellationToken);
     }
+
+    #endregion
 
 }
